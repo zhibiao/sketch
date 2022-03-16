@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>SKETCH.js</title>
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        height: 100%;
+        margin: 0;
+        background-color: rgb(44, 46, 42);
+        touch-action: none;
+        user-select: none;
+      }
+
+      #container1 {
+        width: 400px;
+        height: 240px;
+        background-color: blueviolet;
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        transform: rotate(180deg);
+      }
+
+      #control1 {
+        position: absolute;
+        left: 10px;
+        top: 260px;
+      }
+
+      #container2 {
+        width: 400px;
+        height: 240px;
+        background-color: chocolate;
+        position: absolute;
+        left: 500px;
+        top: 10px;
+        transform: rotate(180deg);
+      }
+
+      #container3 {
+        width: 400px;
+        height: 240px;
+        background-color: gold;
+        position: absolute;
+        left: 10px;
+        top: 310px;
+      }
+
+      #control3 {
+        position: absolute;
+        left: 10px;
+        top: 560px;
+      }
+
+      #container4 {
+        width: 400px;
+        height: 240px;
+        background-color: lime;
+        position: absolute;
+        left: 500px;
+        top: 310px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="container1"></div>
+    
+    <div id="control1">
+      <button id="clear1">Clear</button>
+      <button id="brush1">Brush</button>
+      <button id="eraser1">Eraser</button>
+    </div>
+
+    <div id="container2"></div>
+
+    <div id="container3"></div>
+    <div id="control3">
+      <button id="clear3">Clear</button>
+      <button id="brush3">Brush</button>
+      <button id="eraser3">Eraser</button>
+    </div>
+
+    <div id="container4"></div>
+
+    <script src="./socket.io.js"></script>
+    <script src="./sketch.js"></script>
+    <script>
+      {
+        const context1 = new sketch.Context("#container1", {
+          width: 400,
+          height: 300,
+          reversed: true,
+        });
+
+        let brush1 = null;
+        let eraser1 = null;
+
+        document.querySelector("#clear1").addEventListener("click", () => {
+          if (context1) {
+            context1.clear();
+          }
+        });
+
+        document.querySelector("#brush1").addEventListener("click", () => {
+          if (eraser1) {
+            eraser1.destroy();
+            eraser1 = null;
+          }
+
+          if (brush1) {
+            brush1.destroy();
+            brush1 = null;
+          }
+
+          brush1 = new sketch.Brush(context1, { strokeColor: "red" });
+        });
+
+        document.querySelector("#eraser1").addEventListener("click", () => {
+          if (eraser1) {
+            eraser1.destroy();
+            eraser1 = null;
+          }
+
+          if (brush1) {
+            brush1.destroy();
+            brush1 = null;
+          }
+
+          eraser1 = new sketch.Eraser(context1, {});
+        });
+      }
+
+      {
+        const context2 = new sketch.Context("#container2", {
+          width: 400,
+          height: 300,
+          reversed: true,
+        });
+        const brush2 = new sketch.Brush(context2, { strokeColor: "blue" });
+      }
+
+      {
+        const context3 = new sketch.Context("#container3", {
+          width: 400,
+          height: 300,
+        });
+        let brush3 = null;
+        let eraser3 = null;
+
+        document.querySelector("#clear3").addEventListener("click", () => {
+          if (context3) {
+            context3.clear();
+          }
+        });
+
+        document.querySelector("#brush3").addEventListener("click", () => {
+          if (eraser3) {
+            eraser3.destroy();
+            eraser3 = null;
+          }
+
+          if (brush3) {
+            brush3.destroy();
+            brush3 = null;
+          }
+
+          brush3 = new sketch.Brush(context3, { strokeColor: "white" });
+        });
+
+        document.querySelector("#eraser3").addEventListener("click", () => {
+          if (eraser3) {
+            eraser3.destroy();
+            eraser3 = null;
+          }
+
+          if (brush3) {
+            brush3.destroy();
+            brush3 = null;
+          }
+
+          eraser3 = new sketch.Eraser(context3, {});
+        });
+      }
+
+      {
+        const context4 = new sketch.Context("#container4", {
+          width: 400,
+          height: 300,
+        });
+        const brush4 = new sketch.Brush(context4, { strokeColor: "black" });
+      }
+    </script>
+  </body>
+</html>
