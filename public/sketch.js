@@ -12,6 +12,7 @@
     }
 
     init() {
+      console.log("[Eraser::init]");
       const { upperCanvasEl } = this.context;
 
       this.onMouseDown = this.onMouseDown.bind(this);
@@ -32,6 +33,7 @@
     }
 
     destroy() {
+      console.log("[Eraser::destroy]");
       const { upperCanvasEl } = this.context;
       upperCanvasEl.removeEventListener("mousedown", this.onMouseDown);
       upperCanvasEl.removeEventListener("mousemove", this.onMouseMove);
@@ -226,6 +228,7 @@
     }
 
     init() {
+      console.log("[Brush::init]");
       const { upperCanvasEl } = this.context;
       this.setStrokeColor(this.strokeColor);
       this.setLineWidth(this.lineWidth);
@@ -248,6 +251,7 @@
     }
 
     destroy() {
+      console.log("[Brush::destroy]");
       const { upperCanvasEl } = this.context;
       upperCanvasEl.removeEventListener("mousedown", this.onMouseDown);
       upperCanvasEl.removeEventListener("mousemove", this.onMouseMove);
@@ -428,6 +432,7 @@
     }
 
     init() {
+      console.log("[Context::init]");
       this.lowerCanvasEl = document.createElement("canvas");
       this.lowerCanvasCtx = this.lowerCanvasEl.getContext("2d");
       this.lowerCanvasEl.width = this.canvasWidth;
@@ -470,6 +475,7 @@
     }
 
     destroy() {
+      console.log("[Context::destroy]");
       this.socketIo.off("connect", this.onSocketConnect);
       this.socketIo.off("disconnect", this.onSocketDisConnect);
       this.socketIo.off("canvas:update", this.onCanvasUpdate);
