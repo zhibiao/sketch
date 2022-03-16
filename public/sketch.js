@@ -530,6 +530,10 @@
       img.src = dataURL;
     }
 
+    toDataURL() {
+      return this.lowerCanvasEl.toDataURL("image/png");
+    }
+
     onSocketConnect() {
       console.log("[Context::connect]");
     }
