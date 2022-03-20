@@ -2,11 +2,11 @@
   class Eraser {
     constructor(context, options) {
       this.context = context;
-      this.pointerRecords = [];
+      this.pointerPaths = [];
       this.pointerStatus = false;
       this.minRadius = 16;
       this.maxRadius = 100;
-      this.radiusFactor = 3;
+      this.radiusFactor = 0.5;
       this.radius = options.radius || 16;
       this.init();
     }
@@ -117,8 +117,8 @@
       console.log("[Eraser::Down]");
       this.addCursor();
       this.moveCursor(pointer.x, pointer.y);
-      this.pointerRecords = [];
-      this.pointerRecords.push(pointer);
+      this.pointerPaths = [];
+      this.pointerPaths.push(pointer);
     }
 
     onPointerMove(pointer) {
@@ -128,14 +128,14 @@
       }
       this.moveCursor(pointer.x, pointer.y);
       this.context.clearLowerCanvasCircle(pointer, this.radius);
-      this.pointerRecords.push(pointer);
+      this.pointerPaths.push(pointer);
     }
 
     onPointerUp() {
       console.log("[Eraser::Up]");
       const { lowerCanvasEl, socketIo } = this.context;
       this.removeCursor();
-      this.pointerRecords = [];
+      this.pointerPaths = [];
       const dataURL = lowerCanvasEl.toDataURL("image/png");
       socketIo.emit("canvas:erased", dataURL);
     }
@@ -198,11 +198,8 @@
     }
 
     calcEraserRadius() {
-      if (this.pointerRecords && this.pointerRecords.length > 1) {
-        const lastPoint = this.pointerRecords[this.pointerRecords.length - 1];
-
-        const penultimatePoint =
-          this.pointerRecords[this.pointerRecords.length - 2];
+      if (this.pointerPaths && this.pointerPaths.length > 1) {
+        const [penultimatePoint, lastPoint] = this.pointerPaths.slice(-2);
 
         const distance = Math.sqrt(
           Math.pow(lastPoint.x - penultimatePoint.x, 2),
@@ -223,7 +220,11 @@
       this.context = context;
       this.strokeColor = options.strokeColor || "red";
       this.lineWidth = options.lineWidth || 2;
+      this.lineJoin = options.lineJoin || "round";
+      this.lineCap = options.lineCap || "round";
+      this.pointerPaths = [];
       this.pointerStatus = false;
+      this.beginPoint = null;
       this.init();
     }
 
@@ -232,6 +233,8 @@
       const { upperCanvasEl } = this.context;
       this.setStrokeColor(this.strokeColor);
       this.setLineWidth(this.lineWidth);
+      this.setLineJoin(this.lineJoin);
+      this.setLineCap(this.lineCap);
 
       this.onMouseDown = this.onMouseDown.bind(this);
       this.onMouseMove = this.onMouseMove.bind(this);
@@ -333,15 +336,24 @@
 
     onPointerDown(pointer) {
       console.log("[Brush::Down]");
-      const { upperCanvasCtx } = this.context;
-      upperCanvasCtx.beginPath();
-      upperCanvasCtx.moveTo(pointer.x, pointer.y);
+      this.pointerPaths = [];
+      this.beginPoint = pointer;
+      this.pointerPaths.push(pointer);
     }
 
     onPointerMove(pointer) {
-      const { upperCanvasCtx } = this.context;
-      upperCanvasCtx.lineTo(pointer.x, pointer.y);
-      upperCanvasCtx.stroke();
+      this.pointerPaths.push(pointer);
+      if (this.pointerPaths.length < 3) {
+        return;
+      }
+
+      const [controlPoint, lastPoint] = this.pointerPaths.slice(-2);
+      const endPoint = {
+        x: (controlPoint.x + lastPoint.x) / 2,
+        y: (controlPoint.y + lastPoint.y) / 2,
+      };
+      this.drawLine(this.beginPoint, controlPoint, endPoint);
+      this.beginPoint = endPoint;
     }
 
     onPointerUp() {
@@ -367,6 +379,20 @@
       socketIo.emit("canvas:update", dataURL);
 
       this.context.clearUpperCanvas();
+    }
+
+    drawLine(beginPoint, controlPoint, endPoint) {
+      const { upperCanvasCtx } = this.context;
+      upperCanvasCtx.beginPath();
+      upperCanvasCtx.moveTo(beginPoint.x, beginPoint.y);
+      upperCanvasCtx.quadraticCurveTo(
+        controlPoint.x,
+        controlPoint.y,
+        endPoint.x,
+        endPoint.y
+      );
+      upperCanvasCtx.stroke();
+      upperCanvasCtx.closePath();
     }
 
     getPointer(event) {
@@ -413,6 +439,18 @@
       this.lineWidth = lineWidth;
       const { upperCanvasCtx } = this.context;
       upperCanvasCtx.lineWidth = this.lineWidth;
+    }
+
+    setLineJoin(lineJoin) {
+      this.lineJoin = lineJoin;
+      const { upperCanvasCtx } = this.context;
+      upperCanvasCtx.lineJoin = this.lineJoin;
+    }
+
+    setLineCap(lineCap) {
+      this.lineCap = lineCap;
+      const { upperCanvasCtx } = this.context;
+      upperCanvasCtx.lineCap = this.lineCap;
     }
   }
 
